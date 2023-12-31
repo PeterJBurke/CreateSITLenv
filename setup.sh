@@ -29,7 +29,6 @@ sudo apt-get install gitk git-gui -y
 git clone https://github.com/ArduPilot/ardupilot.git
 cd ~/ardupilot
 git submodule update --init --recursive
-cd
 Tools/environment_install/install-prereqs-ubuntu.sh -y
 . ~/.profile
 
