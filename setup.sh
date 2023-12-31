@@ -19,7 +19,7 @@ sudo apt-get upgrade -y
 
 # Install EMACS, Professor Burke's favorite text editor
 sudo apt-get install emacs -y
-sudo apt-get install emacs -y
+
 
 echo "Setting up Ardupilot build envirnoment"
 # https://ardupilot.org/dev/docs/building-setup-linux.html#building-setup-linux
