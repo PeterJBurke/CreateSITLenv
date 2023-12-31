@@ -38,6 +38,8 @@ echo "https://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html"
 echo "https://ardupilot.org/mavproxy/docs/getting_started/quickstart.html"
 
 echo "To run SITL:"
+echo "Either logout and log back and to run these commands, or run manualy..."
+echo ". ~/.profile"
 echo " an example commmand:"
 echo "cd ~/ardupilot/ArduCopter;  sim_vehicle.py "
 echo " and "
