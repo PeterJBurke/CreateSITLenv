@@ -18,3 +18,11 @@ The first time you might have to run this:
  ```
 . ~/.profile
  ```
+
+If in a virtual machine on M1/M2 Macs, according to
+[xyz](https://www.vizeit.com/ubuntu-22-04-on-mac-m1/)
+use this command to allow clipboard copy:
+ ```
+sudo apt install spice-vdagent spice-webdavd
+ ```
+
