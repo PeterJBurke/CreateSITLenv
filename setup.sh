@@ -3,6 +3,7 @@
 # Script to create SITL envirnonment on a Linux machine or instance
 # Peter Burke 12/30/2023
 # tested on AWS E2C Ubuntu 22.04
+# works also on Linux Mint
 
 echo "######### Setting up server #########"
 echo "For Amazon Web Services (AWS) Amazon Machine Image (AMI) Linux Ubuntu Server 22.04 LTS (HVM)"
