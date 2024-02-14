@@ -33,6 +33,12 @@ git submodule update --init --recursive
 Tools/environment_install/install-prereqs-ubuntu.sh -y
 . ~/.profile
 
+echo "Found these are needed"
+# see https://discuss.ardupilot.org/t/failed-to-load-module-no-module-named-console/111125/5
+sudo apt-get install python3-wxgtk4.0 -y --no-install-recommends
+# see https://stackoverflow.com/questions/3655306/ubuntu-usr-bin-env-python-no-such-file-or-directory
+sudo apt install python-is-python3
+
 echo "Finished setting up server!"
 echo "For help see:"
 echo "https://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html"
