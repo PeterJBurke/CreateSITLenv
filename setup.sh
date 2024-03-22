@@ -27,7 +27,9 @@ echo "Setting up Ardupilot build envirnoment"
 
 sudo apt-get install git -y
 sudo apt-get install gitk git-gui -y
-git clone https://github.com/ArduPilot/ardupilot.git
+#git clone https://github.com/ArduPilot/ardupilot.git
+git clone https://github.com/uci-overRID/RID
+git checkout v2.2.1
 cd ~/ardupilot
 git submodule update --init --recursive
 Tools/environment_install/install-prereqs-ubuntu.sh -y
