@@ -51,5 +51,7 @@ echo " an example commmand:"
 echo "cd ~/ardupilot/ArduCopter;  sim_vehicle.py "
 echo " and "
 echo "cd ~/ardupilot/ArduCopter;  sim_vehicle.py --console --map --osd --out=udp:35.94.121.200:14550 --custom-location=33.64586111,-117.84275,25,0"
+echo " if terminal only, skip map osd console: "
+echo "cd ~/ardupilot/ArduCopter;  sim_vehicle.py --out=udp:35.94.121.200:14550 --custom-location=33.64586111,-117.84275,25,0"
 
 
