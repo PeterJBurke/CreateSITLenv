@@ -3,6 +3,7 @@
 # "create a single sh script to install a service and enable it on linux. The service should run as user "dronepilot". This is the command the service should run:
 # . ~/.profile
 # cd ~/ardupilot/ArduCopter;  sim_vehicle.py  --out=udp:0.0.0.0:14550  --out tcp:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0"
+# --- V2: Removed explicit Group= directive to resolve potential 216/GROUP errors ---
 
 # --- Configuration ---
 SERVICE_NAME="drone_sim"
@@ -82,7 +83,7 @@ Wants=network-online.target
 
 [Service]
 User=${SERVICE_USER}
-Group=$(id -gn ${SERVICE_USER}) # Use primary group of the user
+# Group= directive removed - systemd will use the user's primary group by default
 WorkingDirectory=${WORKING_DIR}
 
 # Ensure PATH is set correctly, sourcing .profile might not always work as expected in non-interactive systemd context
