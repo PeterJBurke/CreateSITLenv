@@ -14,7 +14,8 @@ The service (`drone_sim.service`) will be configured to:
 ## Prerequisites
 
 1.  **Systemd:** Your Linux distribution must use systemd (most modern distributions like Ubuntu, Debian, Fedora, CentOS do).
-2.  **`dronepilot` User:** The user `dronepilot` must exist on the system. If not, create it:
+2.  **`wget`:** The `wget` command-line utility must be installed. If not, install it (e.g., `sudo apt update && sudo apt install wget` on Debian/Ubuntu or `sudo yum install wget` on CentOS/Fedora).
+3.  **`dronepilot` User:** The user `dronepilot` must exist on the system. If not, create it:
     ```bash
     sudo useradd -m -s /bin/bash dronepilot
     ```
@@ -22,16 +23,21 @@ The service (`drone_sim.service`) will be configured to:
     ```bash
     # Example: sudo usermod -aG dialout dronepilot
     ```
-3.  **ArduPilot Source Code:** The `dronepilot` user must have the ArduPilot source code checked out and potentially built within their home directory, specifically at `~/ardupilot/ArduCopter`. The script assumes this path.
+4.  **ArduPilot Source Code:** The `dronepilot` user must have the ArduPilot source code checked out and potentially built within their home directory, specifically at `~/ardupilot/ArduCopter`. The script assumes this path.
     *   Log in or switch to the `dronepilot` user (`su - dronepilot` or `sudo -iu dronepilot`) to perform the checkout/setup if needed.
     *   Ensure `sim_vehicle.py` is present and executable within that directory.
     *   Ensure any necessary dependencies for `sim_vehicle.py` are installed and accessible by the `dronepilot` user (often handled by ArduPilot's setup scripts).
-4.  **`.profile` Configuration:** The `dronepilot` user's `~/.profile` should correctly set up any necessary environment variables (like `PATH`) so that `sim_vehicle.py` and its dependencies can be found and executed when sourced.
+5.  **`.profile` Configuration:** The `dronepilot` user's `~/.profile` should correctly set up any necessary environment variables (like `PATH`) so that `sim_vehicle.py` and its dependencies can be found and executed when sourced.
 
 ## Installation Instructions
 
-1.  **Save the Script:** Download or copy the content of `install_drone_service.sh` to your Linux machine.
-2.  **Make Executable:** Open a terminal and navigate to the directory where you saved the script. Make it executable:
+1.  **Download the Script:** Open a terminal and use `wget` to download the installer script:
+    ```bash
+    wget https://raw.githubusercontent.com/PeterJBurke/CreateSITLenv/main/install_drone_service.sh
+    ```
+    *(Note: The URL points directly to the `main` branch. Ensure this is the desired version.)*
+
+2.  **Make Executable:** Make the downloaded script executable:
     ```bash
     chmod +x install_drone_service.sh
     ```
