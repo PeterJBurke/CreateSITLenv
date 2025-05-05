@@ -3,44 +3,49 @@
 # "create a single sh script to install a service and enable it on linux. The service should run as user "dronepilot". This is the command the service should run:
 # . ~/.profile
 # cd ~/ardupilot/ArduCopter;  sim_vehicle.py  --out=udp:0.0.0.0:14550  --out tcp:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0"
-# --- V2: Removed explicit Group= directive to resolve potential 216/GROUP errors ---
+# --- Final Version after Troubleshooting ---
 
 # --- Configuration ---
 SERVICE_NAME="drone_sim"
 SERVICE_USER="dronepilot"
-SERVICE_DESC="ArduPilot Drone Simulator Service"
-# Get the user's home directory dynamically
-USER_HOME=$(getent passwd "$SERVICE_USER" | cut -d: -f6)
-# If USER_HOME is empty, the user doesn't exist or command failed
-if [ -z "$USER_HOME" ]; then
-    echo "Error: Could not determine home directory for user '$SERVICE_USER'." >&2
-    echo "Please ensure the user exists before running this script." >&2
-    # Exit here if user doesn't exist, as we can't proceed
-    if ! id "$SERVICE_USER" &>/dev/null; then
-        echo "Error: User '$SERVICE_USER' does not exist." >&2
-        echo "Please create the user first, for example:" >&2
-        echo "  sudo useradd -m -s /bin/bash $SERVICE_USER" >&2
-        # Optionally add to necessary groups if needed, e.g., dialout for serial ports
-        # echo "  sudo usermod -aG dialout $SERVICE_USER" >&2
-        exit 1
-    else
-        # User exists but getent failed - less likely, but possible permission issue
-        echo "Warning: Could not automatically determine home directory for '$SERVICE_USER'." >&2
-        echo "Attempting to guess home directory as /home/$SERVICE_USER. Verify this is correct." >&2
-        USER_HOME="/home/$SERVICE_USER" # Fallback guess
-        if [ ! -d "$USER_HOME" ]; then
-             echo "Error: Fallback home directory $USER_HOME does not exist." >&2
-             exit 1
-        fi
-    fi
-fi
-
-WORKING_DIR="${USER_HOME}/ardupilot/ArduCopter"
-# Use 'exec' so the final process replaces the shell, cleaner process tree
-# Ensure the path to sim_vehicle.py is correct or it's in the PATH after sourcing .profile
-# Using full path to sh for robustness
-COMMAND_TO_RUN="/bin/sh -c '. ${USER_HOME}/.profile && cd ${WORKING_DIR} && exec sim_vehicle.py --out=udp:0.0.0.0:14550 --out tcp:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0'"
+SERVICE_DESC="ArduPilot Drone Simulator Service (SITL Only)"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+
+# Define paths explicitly for clarity and robustness in service context
+USER_HOME="/home/${SERVICE_USER}" # Assuming standard home location
+VENV_ACTIVATE="${USER_HOME}/venv-ardupilot/bin/activate"
+ARDUPILOT_DIR="${USER_HOME}/ardupilot"
+VEHICLE_DIR="${ARDUPILOT_DIR}/ArduCopter"
+SIM_VEHICLE_SCRIPT="${ARDUPILOT_DIR}/Tools/autotest/sim_vehicle.py"
+GCC_ARM_PATH="/opt/gcc-arm-none-eabi-10-2020-q4-major/bin" # Adjust if different
+CCACHE_PATH="/usr/lib/ccache" # Adjust if different
+
+# --- Build the ExecStart command ---
+# This explicitly sets up the environment and runs the command.
+# Using && ensures commands stop if one fails.
+# Using full paths for key components.
+COMMAND_TO_RUN="/usr/bin/sudo -u ${SERVICE_USER} /bin/bash -c '\
+  echo \"Setting up environment for ${SERVICE_USER}...\"; \
+  TEMP_PATH=\"\$PATH\"; \
+  if [ -d \"${USER_HOME}/bin\" ]; then TEMP_PATH=\"${USER_HOME}/bin:\$TEMP_PATH\"; echo \"Added ~/bin to PATH\"; fi; \
+  if [ -d \"${USER_HOME}/.local/bin\" ]; then TEMP_PATH=\"${USER_HOME}/.local/bin:\$TEMP_PATH\"; echo \"Added ~/.local/bin to PATH\"; fi; \
+  if [ -f \"${VENV_ACTIVATE}\" ]; then \
+    echo \"Activating venv: ${VENV_ACTIVATE}\"; \
+    source \"${VENV_ACTIVATE}\"; \
+    TEMP_PATH=\"\$PATH\"; \
+  else \
+    echo \"WARNING: Virtualenv activate script not found: ${VENV_ACTIVATE}\"; \
+  fi; \
+  echo \"Exporting specific PATH additions...\"; \
+  if [ -d \"${GCC_ARM_PATH}\" ]; then TEMP_PATH=\"${GCC_ARM_PATH}:\$TEMP_PATH\"; else echo \"WARNING: GCC ARM path not found: ${GCC_ARM_PATH}\"; fi; \
+  if [ -d \"${ARDUPILOT_DIR}/Tools/autotest\" ]; then TEMP_PATH=\"${ARDUPILOT_DIR}/Tools/autotest:\$TEMP_PATH\"; else echo \"WARNING: ArduPilot autotest path not found\"; fi; \
+  if [ -d \"${CCACHE_PATH}\" ]; then TEMP_PATH=\"${CCACHE_PATH}:\$TEMP_PATH\"; else echo \"WARNING: ccache path not found: ${CCACHE_PATH}\"; fi; \
+  export PATH=\"\$TEMP_PATH\"; \
+  echo \"Changing directory to ${VEHICLE_DIR}...\"; \
+  cd \"${VEHICLE_DIR}\" && \
+  echo \"Executing ${SIM_VEHICLE_SCRIPT}...\"; \
+  exec \"${SIM_VEHICLE_SCRIPT}\" -v ArduCopter --no-mavproxy --out=udp:0.0.0.0:14550 --out tcp:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0 \
+'"
 
 # --- Script Logic ---
 
@@ -50,28 +55,33 @@ if [ "$(id -u)" -ne 0 ]; then
    exit 1
 fi
 
-# 2. Check if the user exists (already done partially when getting home dir)
+# 2. Check if the user exists
 if ! id "$SERVICE_USER" &>/dev/null; then
-    # This is redundant if the USER_HOME check above exits, but kept for clarity
     echo "Error: User '$SERVICE_USER' does not exist." >&2
-    echo "Please create the user first." >&2
+    echo "Please create the user first, for example:" >&2
+    echo "  sudo useradd -m -s /bin/bash $SERVICE_USER" >&2
     exit 1
 fi
 echo "User '$SERVICE_USER' found."
-echo "Home directory set to: $USER_HOME"
-echo "Working directory set to: $WORKING_DIR"
-echo "Service command: $COMMAND_TO_RUN"
 
-# Verify working directory exists for the target user
-if ! sudo -u "$SERVICE_USER" test -d "$WORKING_DIR"; then
-    echo "Warning: Working directory '$WORKING_DIR' does not exist or is not accessible by user '$SERVICE_USER'." >&2
-    echo "The service might fail to start. Please ensure the directory exists and the user has permissions." >&2
-    # Decide whether to exit or continue with warning
-    # read -p "Continue anyway? (y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+# 3. Check required paths exist (as dronepilot user)
+# These checks help catch setup errors before the service tries to run
+paths_ok=true
+echo "Checking required paths for user $SERVICE_USER..."
+if ! sudo -u "$SERVICE_USER" test -f "$VENV_ACTIVATE"; then echo "Warning: Venv activate script not found: $VENV_ACTIVATE"; paths_ok=false; fi
+if ! sudo -u "$SERVICE_USER" test -d "$VEHICLE_DIR"; then echo "Error: Vehicle directory not found: $VEHICLE_DIR"; paths_ok=false; fi
+if ! sudo -u "$SERVICE_USER" test -f "$SIM_VEHICLE_SCRIPT"; then echo "Error: sim_vehicle.py script not found: $SIM_VEHICLE_SCRIPT"; paths_ok=false; fi
+# Add checks for GCC_ARM_PATH, CCACHE_PATH if their absence is critical
+
+if [ "$paths_ok" = false ]; then
+    echo "Error: One or more required paths not found or accessible by user $SERVICE_USER. Please check configuration and setup." >&2
+    # Optionally exit here if checks fail critically
+    # exit 1
 fi
+echo "Path checks completed."
 
 
-# 3. Create the systemd service file
+# 4. Create the systemd service file
 echo "Creating systemd service file at ${SERVICE_FILE}..."
 
 cat << EOF > "${SERVICE_FILE}"
@@ -82,16 +92,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-User=${SERVICE_USER}
-# Group= directive removed - systemd will use the user's primary group by default
-WorkingDirectory=${WORKING_DIR}
-
-# Ensure PATH is set correctly, sourcing .profile might not always work as expected in non-interactive systemd context
-# Environment="PATH=/bin:/usr/bin:/usr/local/bin:${USER_HOME}/.local/bin:${USER_HOME}/bin" # Example, adjust as needed
-# Or rely on PamEnvironment=yes if user session environment is needed (see systemd docs)
-
-# Use sh -c to handle sourcing profile and changing directory
-# Make sure sim_vehicle.py is executable and in the PATH or specify full path
+# User=, Group=, WorkingDirectory= omitted; handled by ExecStart command
 ExecStart=${COMMAND_TO_RUN}
 
 # Restart policy
@@ -102,52 +103,47 @@ RestartSec=10s
 StandardOutput=journal
 StandardError=journal
 
-# Optional: Define resource limits if necessary
-# LimitNOFILE=65536
-
-# Optional: Kill mode if sim_vehicle.py spawns child processes that need cleanup
-# KillMode=process
-
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# 4. Set permissions (systemd usually handles this, but explicit doesn't hurt)
+# 5. Set permissions (systemd usually handles this, but explicit doesn't hurt)
 chmod 644 "${SERVICE_FILE}"
 
 echo "Service file created."
 
-# 5. Reload systemd manager configuration
+# 6. Reload systemd manager configuration
 echo "Reloading systemd daemon..."
 systemctl daemon-reload
 
-# 6. Enable the service to start on boot
+# 7. Enable the service to start on boot
 echo "Enabling service ${SERVICE_NAME}..."
 systemctl enable "${SERVICE_NAME}.service"
 
-# 7. Start the service immediately
+# 8. Start the service immediately
 echo "Starting service ${SERVICE_NAME}..."
 systemctl start "${SERVICE_NAME}.service"
 
-# 8. Display service status
+# 9. Display service status
 echo "Service ${SERVICE_NAME} status:"
 # Use --no-pager to prevent status from taking over the terminal
-# Check the exit code of the start command before showing status
+# Give the service a moment to start before checking status
+sleep 3
 if systemctl is-active --quiet "${SERVICE_NAME}"; then
   echo "Service started successfully."
   systemctl --no-pager status "${SERVICE_NAME}.service"
 else
-  echo "Error: Service failed to start. Please check logs." >&2
+  echo "Error: Service failed to start or stopped shortly after starting. Please check logs." >&2
   # Show status even on failure for more details
   systemctl --no-pager status "${SERVICE_NAME}.service"
   echo "Check logs with: sudo journalctl -u ${SERVICE_NAME} -e" >&2
   exit 1 # Exit with error if service failed to start
 fi
 
-
 echo ""
 echo "--- Installation Complete ---"
-echo "Service '${SERVICE_NAME}' is enabled and started."
+echo "Service '${SERVICE_NAME}' is enabled and should be running."
+echo "The SITL process itself should be listening on udp:0.0.0.0:14550 and tcp:0.0.0.0:5678."
 echo "To check logs: sudo journalctl -u ${SERVICE_NAME} -f"
 echo "To check status: sudo systemctl status ${SERVICE_NAME}"
 echo "To stop service: sudo systemctl stop ${SERVICE_NAME}"
@@ -162,9 +158,11 @@ exit 0
 #    # Optionally add the user to groups if needed (e.g., dialout for serial):
 #    # sudo usermod -aG dialout dronepilot
 #
-# 2. Ensure the 'dronepilot' user has the ardupilot code checked out and built,
-#    specifically the directory specified in WORKING_DIR (~/ardupilot/ArduCopter by default).
-#    Also ensure `sim_vehicle.py` is executable and potentially in the PATH set by ~/.profile.
+# 2. Ensure the 'dronepilot' user has:
+#    - The ardupilot code checked out (e.g., in ~/ardupilot).
+#    - A Python virtual environment set up (e.g., ~/venv-ardupilot) with ArduPilot SITL dependencies installed (mavproxy, empy, etc.).
+#    - Necessary build tools like the ARM GCC toolchain installed (if the paths at the top of the script are relevant).
+#    - The paths configured near the top of this script match your setup.
 #
 # 3. Save this script content to a file, e.g., install_drone_service.sh
 #
