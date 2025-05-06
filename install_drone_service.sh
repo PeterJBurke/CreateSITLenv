@@ -3,12 +3,12 @@
 # "create a single sh script to install a service and enable it on linux. The service should run as user "dronepilot". This is the command the service should run:
 # . ~/.profile
 # cd ~/ardupilot/ArduCopter;  sim_vehicle.py  --out=udp:0.0.0.0:14550  --out tcp:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0"
-# --- Final Version after Troubleshooting ---
+# --- Final Version: Includes MAVProxy Daemon via --mavproxy-args ---
 
 # --- Configuration ---
 SERVICE_NAME="drone_sim"
 SERVICE_USER="dronepilot"
-SERVICE_DESC="ArduPilot Drone Simulator Service (SITL Only)"
+SERVICE_DESC="ArduPilot SITL Service with MAVProxy Daemon" # Updated description
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 # Define paths explicitly for clarity and robustness in service context
@@ -22,8 +22,8 @@ CCACHE_PATH="/usr/lib/ccache" # Adjust if different
 
 # --- Build the ExecStart command ---
 # This explicitly sets up the environment and runs the command.
-# Using && ensures commands stop if one fails.
-# Using full paths for key components.
+# Uses bash, sudo -u, activates venv, sets PATHs.
+# Includes -v ArduCopter, -C flag, --mavproxy-args="--daemon", and tcpin output.
 COMMAND_TO_RUN="/usr/bin/sudo -u ${SERVICE_USER} /bin/bash -c '\
   echo \"Setting up environment for ${SERVICE_USER}...\"; \
   TEMP_PATH=\"\$PATH\"; \
@@ -43,8 +43,8 @@ COMMAND_TO_RUN="/usr/bin/sudo -u ${SERVICE_USER} /bin/bash -c '\
   export PATH=\"\$TEMP_PATH\"; \
   echo \"Changing directory to ${VEHICLE_DIR}...\"; \
   cd \"${VEHICLE_DIR}\" && \
-  echo \"Executing ${SIM_VEHICLE_SCRIPT}...\"; \
-  exec \"${SIM_VEHICLE_SCRIPT}\" -v ArduCopter --no-mavproxy --out=udp:0.0.0.0:14550 --out tcp:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0 \
+  echo \"Executing ${SIM_VEHICLE_SCRIPT} with MAVProxy daemon...\"; \
+  exec \"${SIM_VEHICLE_SCRIPT}\" -v ArduCopter -C --mavproxy-args=\"--daemon\" --out=udp:0.0.0.0:14550 --out tcpin:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0 \
 '"
 
 # --- Script Logic ---
@@ -103,11 +103,18 @@ RestartSec=10s
 StandardOutput=journal
 StandardError=journal
 
+# Type=forking might be needed if mavproxy truly forks cleanly with --daemon,
+# but start with simple (default) and see if it works. If sim_vehicle.py
+# exits AFTER successfully launching mavproxy daemon and sitl, then change
+# Type=simple to Type=forking and potentially add GuessMainPID=no if needed.
+# Start with Type=simple first.
+# Type=simple # (Default) Assumes the main process started by ExecStart stays running.
+
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# 5. Set permissions (systemd usually handles this, but explicit doesn't hurt)
+# 5. Set permissions
 chmod 644 "${SERVICE_FILE}"
 
 echo "Service file created."
@@ -143,7 +150,8 @@ fi
 echo ""
 echo "--- Installation Complete ---"
 echo "Service '${SERVICE_NAME}' is enabled and should be running."
-echo "The SITL process itself should be listening on udp:0.0.0.0:14550 and tcp:0.0.0.0:5678."
+echo "This version attempts to run MAVProxy as a daemon via sim_vehicle.py."
+echo "GCS should connect to MAVProxy outputs: udp:0.0.0.0:14550 or by connecting TO tcp:0.0.0.0:5678."
 echo "To check logs: sudo journalctl -u ${SERVICE_NAME} -f"
 echo "To check status: sudo systemctl status ${SERVICE_NAME}"
 echo "To stop service: sudo systemctl stop ${SERVICE_NAME}"
@@ -155,8 +163,6 @@ exit 0
 # --- HOW TO INSTALL ---
 # 1. Ensure the user 'dronepilot' exists on the system. If not, create it:
 #    sudo useradd -m -s /bin/bash dronepilot
-#    # Optionally add the user to groups if needed (e.g., dialout for serial):
-#    # sudo usermod -aG dialout dronepilot
 #
 # 2. Ensure the 'dronepilot' user has:
 #    - The ardupilot code checked out (e.g., in ~/ardupilot).
