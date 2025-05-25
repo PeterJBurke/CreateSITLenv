@@ -5,53 +5,72 @@
 
 set -e
 
+# Color and style codes
+BOLD="\033[1m"
+YELLOW="\033[1;33m"
+GREEN="\033[1;32m"
+RED="\033[1;31m"
+RESET="\033[0m"
+
 show_menu() {
-    echo "\n==============================="
-    echo "CreateSITLenv - Installer"
-    echo "==============================="
-    echo "Choose installation type:"
+    echo -e "\n${YELLOW}${BOLD}*********************************************${RESET}"
+    echo -e "${YELLOW}${BOLD}*         CreateSITLenv - Installer         *${RESET}"
+    echo -e "${YELLOW}${BOLD}*********************************************${RESET}"
+    echo -e "${BOLD}Choose installation type:${RESET}"
     echo "  1) Manual install (dependencies, build, no service)"
     echo "  2) Full install (manual + systemd service for auto virtual drone)"
     echo "  q) Quit"
-    echo "==============================="
+    echo -e "${YELLOW}${BOLD}*********************************************${RESET}"
 }
 
 manual_install() {
-    echo "\n--- Manual Installation: Setting up SITL, MAVProxy, ArduCopter build ---"
+    echo -e "\n${YELLOW}${BOLD}********** STEP 1: Manual Installation: Setting up SITL, MAVProxy, ArduCopter build **********${RESET}"
+    echo -e "${BOLD}Updating package list...${RESET}"
     sudo apt-get update -y
+    echo -e "${BOLD}Upgrading packages...${RESET}"
     sudo apt-get upgrade -y
+    echo -e "${BOLD}Installing dependencies (emacs, git, python, etc)...${RESET}"
     sudo apt-get install emacs git gitk git-gui python3-wxgtk4.0 python-is-python3 -y
 
     if ! id "dronepilot" &>/dev/null; then
-        echo "User 'dronepilot' does not exist. Creating..."
+        echo -e "${BOLD}${YELLOW}User 'dronepilot' does not exist. Creating...${RESET}"
         sudo useradd -m -s /bin/bash dronepilot
+    else
+        echo -e "${GREEN}${BOLD}User 'dronepilot' exists.${RESET}"
     fi
 
+    echo -e "${BOLD}Setting up ArduPilot environment for 'dronepilot'...${RESET}"
     sudo -u dronepilot bash <<'EOF'
 cd ~
 if [ ! -d "ardupilot" ]; then
+    echo "Cloning ArduPilot repo..."
     git clone https://github.com/ArduPilot/ardupilot.git
+else
+    echo "ArduPilot repo already exists."
 fi
 cd ardupilot
+echo "Updating submodules..."
 git submodule update --init --recursive
+echo "Running ArduPilot prerequisites script..."
 Tools/environment_install/install-prereqs-ubuntu.sh -y
+echo "Sourcing profile..."
 . ~/.profile
 EOF
 
-    echo "\nManual install complete!"
-    echo "To run SITL, as 'dronepilot':"
+    echo -e "\n${GREEN}${BOLD}Manual install complete!${RESET}"
+    echo -e "${BOLD}To run SITL, as 'dronepilot':${RESET}"
     echo "  cd ~/ardupilot/ArduCopter"
     echo "  sim_vehicle.py --console --map --osd --out=udp:127.0.0.1:14550 --custom-location=33.64586111,-117.84275,25,0"
     echo "(You may need to run '. ~/.profile' first)"
 }
 
 service_install() {
-    echo "\n--- Service Installation: Setting up systemd virtual drone service ---"
+    echo -e "\n${YELLOW}${BOLD}********** STEP 2: Service Installation: Setting up systemd virtual drone service **********${RESET}"
     manual_install
-    echo "\nProceeding to service setup..."
+    echo -e "${BOLD}Proceeding to systemd service setup...${RESET}"
     sudo bash install_drone_service.sh
-    echo "\nSystemd service installed!"
-    echo "To manage the service:"
+    echo -e "\n${GREEN}${BOLD}Systemd service installed!${RESET}"
+    echo -e "${BOLD}To manage the service:${RESET}"
     echo "  sudo systemctl status drone_sim"
     echo "  sudo systemctl start drone_sim"
     echo "  sudo systemctl stop drone_sim"
