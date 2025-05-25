@@ -16,6 +16,20 @@
 
 ---
 
+## What is Simulated?
+
+By default, this environment simulates an **ArduCopter quadcopter** using ArduPilot's Software-In-The-Loop (SITL) simulator. The firmware and simulation model emulate a typical quadcopter running the latest ArduCopter firmware.
+
+- **Flight Controller:** The simulation emulates a generic Pixhawk-class (FMUv3) flight controller running ArduCopter.
+- **Firmware:** Latest stable ArduCopter build from the official ArduPilot repository.
+- **Vehicle Type:** QuadCopter (4 motors, X-configuration)
+- **Sensors:** All standard sensors (IMU, GPS, barometer, magnetometer, etc.) are simulated in software.
+- **Ground Control:** Connects via MAVLink (UDP or TCP) to GCS software such as QGroundControl or Mission Planner.
+
+You can customize the vehicle type and firmware in the simulation by modifying the `sim_vehicle.py` command or service configuration.
+
+---
+
 ## Quick Start
 
 ```bash
