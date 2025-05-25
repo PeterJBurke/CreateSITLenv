@@ -1,5 +1,7 @@
 # CreateSITLenv: ArduPilot SITL & MAVProxy Installer
 
+> **Important:** Do **not** run these scripts as the `root` user. Only use `sudo` when prompted by the scripts for specific actions (such as installing packages or enabling the systemd service). Always run the scripts from a regular user account (e.g., `dronepilot` or your own username).
+
 **CreateSITLenv** enables:
 1. **Manual installation and use** of MAVProxy, SITL, and ArduCopter (build, run, customize virtual drones yourself)
 2. **Automated setup of a systemd service** to run a virtual drone (ArduPilot SITL + MAVProxy) on boot
