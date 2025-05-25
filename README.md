@@ -83,6 +83,12 @@ sudo useradd -m -s /bin/bash dronepilot
 - `-m` creates a home directory (recommended)
 - `-s /bin/bash` sets the default shell to bash
 
+**Set a password for the new user:**
+```bash
+sudo passwd dronepilot
+```
+- You will be prompted to enter and confirm the password for the new account
+
 **No special privileges are required:**
 - The user does **not** need to be added to the `sudo` group or given admin rights
 - The user only needs a home directory and bash shell
