@@ -29,8 +29,8 @@ manual_install() {
     sudo apt-get update -y
     echo -e "${BOLD}Upgrading packages...${RESET}"
     sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade -y
-    echo -e "${BOLD}Installing dependencies (emacs, git, python, etc)...${RESET}"
-    sudo apt-get install emacs git gitk git-gui python3-wxgtk4.0 python-is-python3 -y
+    echo -e "${BOLD}Installing dependencies (git only)...${RESET}"
+    sudo apt-get install git -y
 
     if ! id "dronepilot" &>/dev/null; then
         echo -e "${BOLD}${YELLOW}User 'dronepilot' does not exist. Creating...${RESET}"
