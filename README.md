@@ -80,9 +80,8 @@ sim_vehicle.py --console --map --osd --out=udp:127.0.0.1:14550 --custom-location
 ---
 
 ## Prerequisites
-- Linux with systemd
-- `sudo` and `bash` installed
-- If using service: a dedicated user account (e.g., `dronepilot`)—see below
+- Linux (tested on Ubuntu 20.04/22.04/24.04 LTS)
+- A dedicated user account (e.g., `dronepilot`)—see below
 
 ---
 
