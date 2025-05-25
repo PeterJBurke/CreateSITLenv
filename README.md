@@ -23,14 +23,6 @@
 
 ---
 
-## Features
-- Installs all dependencies for ArduPilot SITL, MAVProxy, and build tools
-- Optionally sets up a systemd service for automatic virtual drone startup
-- Supports both manual and automated workflows
-- Easy, interactive installer (`install.sh`)
-
----
-
 ## Prerequisites
 - Linux (tested on Ubuntu 20.04/22.04/24.04 LTS)
 - An account that is not root (required for both manual and automatic installation)
