@@ -4,6 +4,7 @@
 
 **CreateSITLenv** enables:
 1. **Manual installation and use** of MAVProxy, SITL, and ArduCopter (build, run, customize virtual drones yourself)
+   ([ArduPilot SITL setup guide](https://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html))
 2. **Automated setup of a systemd service** to run a virtual drone (ArduPilot SITL + MAVProxy) on boot
 
 ---
