@@ -28,7 +28,7 @@ manual_install() {
     echo -e "${BOLD}Updating package list...${RESET}"
     sudo apt-get update -y
     echo -e "${BOLD}Upgrading packages...${RESET}"
-    sudo apt-get upgrade -y
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade -y
     echo -e "${BOLD}Installing dependencies (emacs, git, python, etc)...${RESET}"
     sudo apt-get install emacs git gitk git-gui python3-wxgtk4.0 python-is-python3 -y
 
