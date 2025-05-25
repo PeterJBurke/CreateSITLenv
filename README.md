@@ -1,5 +1,14 @@
 # CreateSITLenv: ArduPilot SITL & MAVProxy Installer
 
+## Use Instructions
+
+**Automatic Mode:**
+- Once installed and running as a service, the simulated drone can be connected to from any ground control station (GCS) software, such as Mission Planner or QGroundControl.
+- Use the IP address of the server and port **5678** to connect:
+  - **TCP:** `tcp://IPADDRESSOFSERVER:5678`
+- Replace `IPADDRESSOFSERVER` with the actual IP address of your server.
+- Example GCS: Mission Planner, QGroundControl, MAVProxy, etc.
+
 > **Important:** Do **not** run these scripts as the `root` user. Only use `sudo` when prompted by the scripts for specific actions (such as installing packages or enabling the systemd service). Always run the scripts from a regular user account (e.g., `dronepilot` or your own username).
 
 **CreateSITLenv** enables:
