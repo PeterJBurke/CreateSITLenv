@@ -1,0 +1,14 @@
+[Unit]
+Description=ArduPilot SITL Service with MAVProxy Daemon (Example)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=dronepilot
+WorkingDirectory=/home/dronepilot/ardupilot/ArduCopter
+Environment="PATH=/home/dronepilot/venv-ardupilot/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/dronepilot/ardupilot/Tools/autotest/sim_vehicle.py -v ArduCopter -C --mavproxy-args="--daemon" --out=udp:0.0.0.0:14550 --out tcpin:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
