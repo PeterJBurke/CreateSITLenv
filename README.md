@@ -67,7 +67,28 @@ sim_vehicle.py --console --map --osd --out=udp:127.0.0.1:14550 --custom-location
 ## Prerequisites
 - Linux with systemd
 - `sudo` and `bash` installed
-- If using service: `dronepilot` user (installer will create if missing)
+- If using service: a dedicated user account (e.g., `dronepilot`)—see below
+
+---
+
+## Creating a Dedicated User Account
+
+To run the SITL/MAVProxy service securely, it's recommended to use a dedicated non-root user (e.g., `dronepilot`).
+
+**To create a new user from the root account or with sudo:**
+
+```bash
+sudo useradd -m -s /bin/bash dronepilot
+```
+- `-m` creates a home directory (recommended)
+- `-s /bin/bash` sets the default shell to bash
+
+**No special privileges are required:**
+- The user does **not** need to be added to the `sudo` group or given admin rights
+- The user only needs a home directory and bash shell
+- The installer and service will handle all necessary permissions for running SITL and MAVProxy
+
+If you want to use a different username, substitute it for `dronepilot` throughout the instructions and scripts.
 
 ---
 
