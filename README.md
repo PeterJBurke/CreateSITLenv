@@ -2,10 +2,10 @@
 
 ## Features
 
-- **Sets up MAVProxy, SITL, and ArduCopter (manually build, run, customize virtual drones yourself)**
-
- Manual installation ** of MAVProxy, SITL, and ArduCopter (build, run, customize virtual drones yourself) ([ArduPilot SITL setup guide](https://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html))
-- **Creates a virtual drone service** automatically runs on boot.
+- **Manual installation and use of MAVProxy, SITL, and ArduCopter**  
+  Build, run, and customize virtual drones yourself ([ArduPilot SITL setup guide](https://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html)).
+- **Automated setup of a systemd service**  
+  Runs a virtual drone (ArduPilot SITL + MAVProxy) automatically on boot as a background service.
 
 ## Usage & Connection
 
