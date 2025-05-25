@@ -87,7 +87,7 @@ sim_vehicle.py --console --map --osd --out=udp:127.0.0.1:14550 --custom-location
 
 ## Creating a Dedicated User Account
 
-To run the SITL/MAVProxy service securely, it's recommended to use a dedicated non-root user (e.g., `dronepilot`).
+To run the SITL/MAVProxy service, you must use a dedicated non-root user (e.g., `dronepilot`) that is a member of the `sudo` group.
 
 **To create a new user from the root account or with sudo:**
 
@@ -103,25 +103,14 @@ sudo passwd dronepilot
 ```
 - You will be prompted to enter and confirm the password for the new account
 
-**No special privileges are required:**
-- The user does **not** need to be added to the `sudo` group or given admin rights
-- The user only needs a home directory and bash shell
-- The installer and service will handle all necessary permissions for running SITL and MAVProxy
-
-If you want to use a different username, substitute it for `dronepilot` throughout the instructions and scripts.
-
----
-
-## (Optional) Giving the User Sudo Privileges
-
-If you want the `dronepilot` user to be able to run commands with `sudo` (i.e., have administrative privileges), you can add them to the `sudo` group:
-
+**Add the user to the sudo group (required):**
 ```bash
 sudo usermod -aG sudo dronepilot
 ```
-
 - After running this command, log out and log back in as `dronepilot` for the change to take effect.
-- **Security Note:** Granting sudo access gives the user full administrative rights. Only do this if you trust the account and understand the security implications.
+- This grants the user administrative rights needed for installation and service management.
+
+If you want to use a different username, substitute it for `dronepilot` throughout the instructions and scripts.
 
 ---
 
