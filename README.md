@@ -4,8 +4,8 @@
 
 - **Installs MAVProxy, SITL, and ArduCopter**  
   Build, run, and customize virtual drones yourself ([ArduPilot SITL setup guide](https://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html)).
-- **Automated setup of a systemd service**  
-  Runs a virtual drone (ArduPilot SITL + MAVProxy) automatically on boot as a background service.
+- **Creates a virtual drone in the cloud**  
+  Installs a background service to automatically run on boot, for an always-on virtual drone accessible from anywhere on the internet.
 
 ## Usage & Connection
 
