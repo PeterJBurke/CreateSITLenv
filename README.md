@@ -11,7 +11,9 @@
 - After installation, the simulated drone runs as a service and can be connected to from any ground control station (GCS) software (e.g., Mission Planner, QGroundControl, MAVProxy).
 - **Connect using:**
   - **TCP:** `tcp://<SERVER_IP>:5678`
+  - **UDP:** `udp://<SERVER_IP>:14550`
   - Replace `<SERVER_IP>` with your server's IP address.
+  - Use TCP for most GCS software (e.g., QGroundControl, Mission Planner). Use UDP if your GCS or workflow prefers it.
 
 **Manual Mode:**
 - After installation, you can start the simulator manually as `dronepilot`:
