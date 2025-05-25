@@ -98,6 +98,19 @@ If you want to use a different username, substitute it for `dronepilot` througho
 
 ---
 
+## (Optional) Giving the User Sudo Privileges
+
+If you want the `dronepilot` user to be able to run commands with `sudo` (i.e., have administrative privileges), you can add them to the `sudo` group:
+
+```bash
+sudo usermod -aG sudo dronepilot
+```
+
+- After running this command, log out and log back in as `dronepilot` for the change to take effect.
+- **Security Note:** Granting sudo access gives the user full administrative rights. Only do this if you trust the account and understand the security implications.
+
+---
+
 ## Troubleshooting
 - **Missing dependencies:** Rerun the installer
 - **Service fails to start:** Check logs: `journalctl -u drone_sim`
