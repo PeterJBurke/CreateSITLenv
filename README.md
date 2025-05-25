@@ -11,7 +11,7 @@
 
 ## Features
 - Installs all dependencies for ArduPilot SITL, MAVProxy, and build tools
-- Optionally sets up a `dronepilot` user and a systemd service for automatic virtual drone startup
+- Optionally sets up a systemd service for automatic virtual drone startup
 - Supports both manual and automated workflows
 - Easy, interactive installer (`install.sh`)
 
