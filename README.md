@@ -1,5 +1,7 @@
 # A simulated, virtual drone for testing and development
 
+![ChatGPT Image May 25, 2025, 06_29_30 PM](https://github.com/user-attachments/assets/ebd03b9c-5a2b-4c81-a359-be0b43b8258f)
+
 ## Features
 
 - **Installs MAVProxy, SITL, and ArduCopter**  
