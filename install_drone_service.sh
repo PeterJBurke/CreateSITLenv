@@ -24,7 +24,7 @@ SIM_VEHICLE_SCRIPT="${ARDUPILOT_DIR}/Tools/autotest/sim_vehicle.py"
 COMMAND_TO_RUN="/usr/bin/sudo -u ${SERVICE_USER} /bin/bash -c '\
   source \"${VENV_ACTIVATE}\" && \
   cd \"${VEHICLE_DIR}\" && \
-  exec \"${SIM_VEHICLE_SCRIPT}\" -v ArduCopter -C --mavproxy-args=\"--daemon\" --out=udp:0.0.0.0:14550 --out tcpin:0.0.0.0:5678 --custom-location=33.64586111,-117.84275,25,0 \
+  exec \"${SIM_VEHICLE_SCRIPT}\" -v ArduCopter -C --mavproxy-args=\"--daemon\" --out=udp:0.0.0.0:14550 --out tcpin:0.0.0.0:5678 --out tcpin:0.0.0.0:6789 --custom-location=33.64586111,-117.84275,25,0 \
 '"
 
 # --- Script Logic ---
@@ -123,7 +123,10 @@ echo ""
 echo "--- Installation Complete ---"
 echo "Service '${SERVICE_NAME}' is enabled and should be running."
 echo "This version uses a simplified startup command."
-echo "GCS should connect to MAVProxy outputs: udp:0.0.0.0:14550 or by connecting TO tcp:0.0.0.0:5678."
+echo "GCS should connect to MAVProxy outputs:"
+echo "  - UDP: udp:0.0.0.0:14550"
+echo "  - TCP: tcp:0.0.0.0:5678 or tcp:0.0.0.0:6789"
+echo ""
 echo "To check logs: sudo journalctl -u ${SERVICE_NAME} -f"
 echo "To check status: sudo systemctl status ${SERVICE_NAME}"
 echo "To stop service: sudo systemctl stop ${SERVICE_NAME}"

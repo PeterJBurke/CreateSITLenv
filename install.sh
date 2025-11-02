@@ -23,7 +23,29 @@ show_menu() {
     echo -e "${YELLOW}${BOLD}*********************************************${RESET}"
 }
 
+check_user() {
+    # Verify running as dronepilot
+    if [ "$(whoami)" != "dronepilot" ]; then
+        echo -e "${RED}${BOLD}ERROR: This installer must be run as the 'dronepilot' user.${RESET}"
+        echo -e "${BOLD}Please follow these steps:${RESET}"
+        echo -e "  1. Create the dronepilot user (as root/sudo user):"
+        echo -e "     ${YELLOW}sudo useradd -m -s /bin/bash dronepilot${RESET}"
+        echo -e "     ${YELLOW}sudo passwd dronepilot${RESET}"
+        echo -e "     ${YELLOW}sudo usermod -aG sudo dronepilot${RESET}"
+        echo -e "  2. Switch to dronepilot user:"
+        echo -e "     ${YELLOW}su - dronepilot${RESET}"
+        echo -e "  3. Clone and run this installer:"
+        echo -e "     ${YELLOW}git clone https://github.com/PeterJBurke/CreateSITLenv.git${RESET}"
+        echo -e "     ${YELLOW}cd CreateSITLenv${RESET}"
+        echo -e "     ${YELLOW}bash install.sh${RESET}"
+        exit 1
+    fi
+    echo -e "${GREEN}${BOLD}✓ Running as dronepilot user${RESET}"
+}
+
 manual_install() {
+    check_user
+    
     echo -e "\n${YELLOW}${BOLD}********** STEP 1: Manual Installation: Setting up SITL, MAVProxy, ArduCopter build **********${RESET}"
     echo -e "${BOLD}Updating package list...${RESET}"
     sudo apt-get update -y
@@ -32,33 +54,24 @@ manual_install() {
     echo -e "${BOLD}Installing dependencies (git only)...${RESET}"
     sudo apt-get install git -y
 
-    if ! id "dronepilot" &>/dev/null; then
-        echo -e "${BOLD}${YELLOW}User 'dronepilot' does not exist. Creating...${RESET}"
-        sudo useradd -m -s /bin/bash dronepilot
+    echo -e "${BOLD}Setting up ArduPilot environment...${RESET}"
+    cd ~
+    if [ ! -d "ardupilot" ]; then
+        echo "Cloning ArduPilot repo..."
+        git clone https://github.com/ArduPilot/ardupilot.git
     else
-        echo -e "${GREEN}${BOLD}User 'dronepilot' exists.${RESET}"
+        echo "ArduPilot repo already exists."
     fi
-
-    echo -e "${BOLD}Setting up ArduPilot environment for 'dronepilot'...${RESET}"
-    sudo -u dronepilot bash <<'EOF'
-cd ~
-if [ ! -d "ardupilot" ]; then
-    echo "Cloning ArduPilot repo..."
-    git clone https://github.com/ArduPilot/ardupilot.git
-else
-    echo "ArduPilot repo already exists."
-fi
-cd ardupilot
-echo "Updating submodules..."
-git submodule update --init --recursive
-echo "Running ArduPilot prerequisites script..."
-Tools/environment_install/install-prereqs-ubuntu.sh -y
-echo "Sourcing profile..."
-. ~/.profile
-EOF
+    cd ardupilot
+    echo "Updating submodules..."
+    git submodule update --init --recursive
+    echo "Running ArduPilot prerequisites script..."
+    Tools/environment_install/install-prereqs-ubuntu.sh -y
+    echo "Sourcing profile..."
+    . ~/.profile
 
     echo -e "\n${GREEN}${BOLD}Manual install complete!${RESET}"
-    echo -e "${BOLD}To run SITL, as 'dronepilot':${RESET}"
+    echo -e "${BOLD}To run SITL:${RESET}"
     echo "  cd ~/ardupilot/ArduCopter"
     echo "  sim_vehicle.py --console --map --osd --out=udp:127.0.0.1:14550 --custom-location=33.64586111,-117.84275,25,0"
     echo "(You may need to run '. ~/.profile' first)"

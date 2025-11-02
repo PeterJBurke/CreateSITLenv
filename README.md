@@ -2,6 +2,22 @@
 
 ![ChatGPT Image May 25, 2025, 06_29_30 PM](https://github.com/user-attachments/assets/ebd03b9c-5a2b-4c81-a359-be0b43b8258f)
 
+## What This Does
+
+This installer automates the complete setup of an ArduPilot Software-In-The-Loop (SITL) environment on Linux. Here's what happens during installation:
+
+1. **Downloads the ArduPilot Codebase**: Clones the official [ArduPilot GitHub repository](https://github.com/ArduPilot/ardupilot) to your local disk (`~/ardupilot`), including all necessary submodules for simulation.
+
+2. **Sets Up the Build Environment**: Runs ArduPilot's `install-prereqs-ubuntu.sh` script (contained within the cloned repository) to automatically install all required dependencies, compilers, Python packages, and tools needed for building and running the simulator on Linux.
+
+3. **Creates a Systemd Service**: Optionally installs a background service (`drone_sim`) that automatically starts on boot, giving you an always-on virtual drone that runs continuously as the `dronepilot` user.
+
+4. **Opens Network Ports for Remote Access**: Configures the simulator to accept connections from any Ground Control Station (GCS) software anywhere in the world via:
+   - **TCP Port 5678 & 6789**: For reliable connections from most GCS applications (QGroundControl, Mission Planner, etc.). Multiple ports allow simultaneous connections.
+   - **UDP Port 14550**: For traditional MAVLink UDP connections
+
+Once installed, your virtual drone is accessible remotely, making it perfect for cloud deployments, remote development, testing, and continuous integration pipelines.
+
 ## Features
 
 - **Installs MAVProxy, SITL, and ArduCopter**  
@@ -14,10 +30,10 @@
 **Automatic Mode (Recommended):**
 - After installation, the simulated drone runs as a service and can be connected to from any ground control station (GCS) software (e.g., Mission Planner, QGroundControl, MAVProxy).
 - **Connect using:**
-  - **TCP:** `tcp://<SERVER_IP>:5678`
+  - **TCP:** `tcp://<SERVER_IP>:5678` or `tcp://<SERVER_IP>:6789`
   - **UDP:** `udp://<SERVER_IP>:14550`
   - Replace `<SERVER_IP>` with your server's IP address.
-  - Use TCP for most GCS software (e.g., QGroundControl, Mission Planner). Use UDP if your GCS or workflow prefers it.
+  - Use TCP for most GCS software (e.g., QGroundControl, Mission Planner). Multiple TCP ports allow simultaneous connections from different GCS instances. Use UDP if your GCS or workflow prefers it.
 
 **Manual Mode:**
 - After installation, you can start the simulator manually as `dronepilot`:
@@ -31,45 +47,52 @@
 
 ## Prerequisites
 - Linux (tested on Ubuntu 20.04/22.04/24.04 LTS)
-- An account that is not root (required for both manual and automatic installation)
-- A dedicated user account (e.g., `dronepilot`)—see below
+- Root or sudo access to create the `dronepilot` user
+- Git installed on your system
 
 ---
 
 ## Quick Start & Installation
 
-1. **Clone and Run Installer**
-    ```bash
-    git clone https://github.com/PeterJBurke/CreateSITLenv.git
-    cd CreateSITLenv
-    bash install.sh
-    ```
-2. **Choose Installation Mode:**
-    - **Automatic (Recommended):** Installs dependencies, builds ArduPilot, sets up Python environment, and enables a systemd service (`drone_sim`) that runs a virtual drone automatically on boot as user `dronepilot`.
-    - **Manual:** Installs dependencies, builds ArduPilot, sets up Python environment, but you manually run SITL/MAVProxy as needed.
+### Step 1: Create the dronepilot User
 
-After installation, follow the [Use Instructions](#use-instructions) above for connecting your GCS.
-
----
-
-## Creating a Dedicated User Account
-
-To run the SITL/MAVProxy service, you must use a dedicated non-root user (e.g., `dronepilot`) that is a member of the `sudo` group.
+First, as a user with sudo privileges (or root), create the dedicated `dronepilot` user:
 
 ```bash
 sudo useradd -m -s /bin/bash dronepilot
 sudo passwd dronepilot
 sudo usermod -aG sudo dronepilot
 ```
-- Log out and back in as `dronepilot` for changes to take effect.
-- Substitute your preferred username as needed.
+
+### Step 2: Switch to dronepilot User
+
+```bash
+su - dronepilot
+```
+
+### Step 3: Clone and Run Installer
+
+```bash
+git clone https://github.com/PeterJBurke/CreateSITLenv.git
+cd CreateSITLenv
+bash install.sh
+```
+
+### Step 4: Choose Installation Mode
+
+The installer will present a menu:
+- **Manual (Option 1):** Installs dependencies, builds ArduPilot, sets up Python environment. You manually run SITL/MAVProxy as needed.
+- **Full Install (Option 2 - Recommended):** Manual setup + systemd service (`drone_sim`) that runs a virtual drone automatically on boot.
+
+After installation, follow the [Usage & Connection](#usage--connection) instructions above for connecting your GCS.
 
 ---
 
 ## Troubleshooting
+- **"ERROR: This installer must be run as the 'dronepilot' user":** Make sure you created the `dronepilot` user and switched to it (`su - dronepilot`) before running the installer
 - **Missing dependencies:** Rerun the installer
 - **Service fails to start:** Check logs: `journalctl -u drone_sim`
-- **GCS can't connect:** Ensure firewall allows UDP 14550/TCP 5678
+- **GCS can't connect:** Ensure firewall allows UDP 14550/TCP 5678/TCP 6789
 - **Manual run errors:** Ensure `. ~/.profile` is sourced and you are in the correct directory
 
 ---
