@@ -5,6 +5,9 @@
 
 set -e
 
+# Save the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Color and style codes
 BOLD="\033[1m"
 YELLOW="\033[1;33m"
@@ -81,7 +84,7 @@ service_install() {
     echo -e "\n${YELLOW}${BOLD}********** STEP 2: Service Installation: Setting up systemd virtual drone service **********${RESET}"
     manual_install
     echo -e "${BOLD}Proceeding to systemd service setup...${RESET}"
-    sudo bash install_drone_service.sh
+    sudo bash "${SCRIPT_DIR}/install_drone_service.sh"
     echo -e "\n${GREEN}${BOLD}Systemd service installed!${RESET}"
     echo -e "${BOLD}To manage the service:${RESET}"
     echo "  sudo systemctl status drone_sim"
